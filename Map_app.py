@@ -184,7 +184,7 @@ def long(adress):
     #1st -> adreça 
         #Si adreça null o error
         #2nd -> Coordinates
-        #Si coordinates en decimal OK  TEST! AQUESTA PART NO SE SI FUNCIONA
+        #Si coordinates en decimal i formato text!!! OK
             #Si coordinates en DMS
             #Coordinates to decimal
 def calc_coord(row):
@@ -196,21 +196,20 @@ def calc_coord(row):
     except:
         pass  
 
-    
     if 'Latitud' in row and 'Longitud' in row and pd.notna(row['Latitud']) and pd.notna(row['Longitud']):
-        
-        if isinstance(row['Latitud'], (int, float)) and isinstance(row['Longitud'], (int, float)):
-            latitud = row['Latitud']
-            longitud = row['Longitud']
-
-        else:
-            latitud = process_dms(row['Latitud'])
-            longitud = process_dms(row['Longitud'])
-        
-        return pd.Series({'Latitud_decimal': latitud, 'Longitud_decimal': longitud, 'Error': False})
+        try:
+            if re.match(r'^\d+\.\d+$', str(row['Latitud'])) and re.match(r'^\d+\.\d+$', str(row['Longitud'])):
+                latitud = float(row['Latitud'])
+                longitud = float(row['Longitud'])
+            else:
+                latitud = process_dms(row['Latitud'])
+                longitud = process_dms(row['Longitud'])
+            
+            return pd.Series({'Latitud_decimal': latitud, 'Longitud_decimal': longitud, 'Error': False})
+        except Exception as e:
+            return pd.Series({'Latitud_decimal': np.nan, 'Longitud_decimal': np.nan, 'Error': True})
     else:
         return pd.Series({'Latitud_decimal': np.nan, 'Longitud_decimal': np.nan, 'Error': True})
-
     
 
 #Funció del mapa general:
